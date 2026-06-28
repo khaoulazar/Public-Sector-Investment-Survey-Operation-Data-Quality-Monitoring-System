@@ -41,8 +41,7 @@ Avant toute modélisation de données, cette phase vise à traduire les compéte
 | EX-04 | Bornes IQR et Z-score sur `ecart_gps_metres` (Fait_Suivi_Terrain) et `nb_erreurs_capi` (Fait_Qualite), par strate région × type d'unité | `Fait_Suivi_Terrain`, `Fait_Qualite` | SQL + Python (scipy) |
 | EX-05 | Rang de chaque région sur l'indice composite | Vue SQL sur l'indice composite | `RANK()` |
 | EX-06 | Évolution des indicateurs par trimestre | `Fait_Suivi_Terrain.date_id` / `Fait_Qualite.date_id` ⨝ `Dim_Calendrier` | Série temporelle SQL/DAX |
-| EX-07 | Indice = f(taux de réponse, taux de retard, taux d'anomalie) — taux de retard = % unités avec `nb_tentatives` ≥ 3 indicateur proxy
-| `Fait_Qualite`, `Fait_Suivi_Terrain` | Formule pondérée (Phase 4) |
+| EX-07 | Indice = f(taux de réponse, taux de retard, taux d'anomalie) — taux de retard = % unités avec `nb_tentatives` ≥ 3 indicateur proxy | `Fait_Qualite`, `Fait_Suivi_Terrain` | Formule pondérée (Phase 4) |
 | EX-08–11 | Restitution des indicateurs ci-dessus | Power BI sur SQLite/Azure SQL | DAX + Power Query |
 
 ## 1.5 Décisions de cadrage actées
