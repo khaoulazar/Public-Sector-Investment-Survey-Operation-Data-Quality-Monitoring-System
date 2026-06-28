@@ -49,7 +49,7 @@ Before any data modeling work, this phase translates the skills to be demonstrat
 | Decision | Choice made | Rationale |
 |---|---|---|
 | Field-monitoring granularity | `nbre_tentatives` counter per unit | No requirement calls for a detailed per-visit history |
-| Time simulation | Fixed snapshot at day 100 (`CURRENT_DAY_OFFSET`) | Sufficient for portfolio demonstration |
+| Time simulation | Fixed snapshot at day 100 (`CURRENT_DAY_OFFSET`) | Only for portfolio demonstration |
 | Working-day calendar | Weekends excluded only (v1) | Public holidays deferred as a future refinement |
 | Outlier methods | IQR **and** Z-score, computed in parallel | Explicit requirement REQ-04 |
 | Composite index | 3 components: response, delay, anomaly | Strictly aligned with REQ-07 |
