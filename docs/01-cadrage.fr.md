@@ -2,7 +2,7 @@
 
 ## 1.1 Objectif de la phase
 
-Avant toute modélisation de données, cette phase vise à traduire les compétences à démontrer en exigences fonctionnelles précises et traçables jusqu'aux tables et colonnes qui les serviront. Aucun élément du schéma de données (Phase 2) ne sera retenu s'il ne répond pas à une exigence formulée ici. Cette discipline garantit un modèle économe, justifiable, et directement aligné sur les livrables visés.
+Avant toute modélisation de données, cette phase vise à traduire les compétences à démontrer en exigences fonctionnelles précises et traçables jusqu'aux tables et colonnes qui les serviront. Aucun élément du schéma de données (Phase 2) c'est retenu s'il ne répond pas à une exigence formulée ici.
 
 ## 1.2 Cadre du projet
 
