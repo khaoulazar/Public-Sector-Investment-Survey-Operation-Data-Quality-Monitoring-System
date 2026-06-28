@@ -52,6 +52,6 @@ Avant toute modélisation de données, cette phase vise à traduire les compéte
 | Lien temporel sur les faits | Ajout d'une clé étrangère `date_id` sur `Fait_Suivi_Terrain` et `Fait_Qualite` | Nécessaire pour EX-06 (tendance dans le temps), absente du schéma initial |
 | Variable de détection d'anomalies | `ecart_gps_metres` **et** `nb_erreurs_capi`, en parallèle | Pas de variable de montant disponible — le système surveille la qualité opérationnelle, pas les données d'investissement |
 | Méthodes d'outliers | IQR **et** Z-score, en parallèle, par strate région × type d'unité | Exigence EX-04 explicite |
-| Définition du taux de retard | % d'unités avec `nb_tentatives` ≥ 3 | Aucune paire de dates (assignation/fin) disponible pour un calcul de retard réel ; seuil ajustable en Phase 4 |
+| Définition du taux de retard | % d'unités avec `nb_tentatives` ≥ 3 | Indicateur proxy car Aucune paire de dates (assignation/fin) disponible pour un calcul de retard réel ; seuil ajustable en Phase 4 |
 | Indice composite | 3 composantes : réponse, retard (proxy tentatives), anomalie | Aligné strictement sur EX-07 |
 | Calendrier ouvrable | Week-ends exclus uniquement (version simplifiée) | Raffinement possible ultérieurement : exclusion des jours fériés marocains |
