@@ -36,8 +36,8 @@ Before any data modeling work, this phase translates the skills to be demonstrat
 
 | Ref. | Required data | Source | Calculation |
 |---|---|---|---|
-| REQ-02 | Units submitted / total units, by region | `Fait_Saisie` ⨝ `Dim_Unite_Enquetee` ⨝ `Dim_Région` | SQL aggregate |
-| REQ-03 | Units corrected / total submitted, by region | `Fait_Qualité` ⨝ `Fait_Saisie` ⨝ `Dim_Région` | SQL aggregate |
+| REQ-02 | Units responded / total units, by region | `Fait_Saisie` ⨝ `Dim_Unite_Enquetee` ⨝ `Dim_Région` | SQL aggregate |
+| REQ-03 | Units corrected / total responded, by region | `Fait_Qualité` ⨝ `Fait_Saisie` ⨝ `Dim_Région` | SQL aggregate |
 | REQ-04 | IQR and Z-score thresholds by region × unit-type stratum | `Fait_Qualité.methode_detection` | SQL + Python (scipy) |
 | REQ-05 | Region rank on composite index | SQL view on composite index | `RANK()` |
 | REQ-06 | Response rate by week/month | `Fait_Saisie.date_saisie` ⨝ `Dim_Calendrier` | SQL/DAX time series |
