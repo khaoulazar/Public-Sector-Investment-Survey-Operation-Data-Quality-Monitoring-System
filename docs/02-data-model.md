@@ -6,7 +6,7 @@ Based on the requirements and decisions made in Phase 1, this phase formalizes a
 
 ## 2.2 Structuring principle
 
-Star schema: `Dim_Unite_Enquetee` is the **central filter table**, surrounded by four descriptive dimensions (`Dim_Region`, `Dim_Type_Unite`, `Dim_Enqueteur`, `Dim_Calendrier`) and two fact tables in a **strict 1:1 relationship** with it (`Fait_Suivi_Terrain`, `Fait_Qualite`) each representing the current monitoring/quality state of a unit, not an event history. A seventh dimension (`Dim_Superviseur`) frames `Dim_Region`, and an additional fact table (`Fait_Allocation_Ressources`) links logistical resources to the region.
+Star schema: `Dim_Unite_Enquetee` is the **central filter table**, surrounded by four descriptive dimensions (`Dim_Region`, `Dim_Type_Unite`, `Dim_Enqueteur`, `Dim_Calendrier`) and two fact tables in a **strict 1:1 relationship** with it (`Fait_Suivi_Terrain`, `Fait_Qualite`) — each representing the current monitoring/quality state of a unit, not an event history. A seventh dimension (`Dim_Superviseur`) frames `Dim_Region`, and an additional fact table (`Fait_Allocation_Ressources`) links logistical resources to the region.
 
 ![Star schema](images/star-schema.png)
 
@@ -32,6 +32,7 @@ Star schema: `Dim_Unite_Enquetee` is the **central filter table**, surrounded by
 
 **Dim_Enqueteur**
 - `agent_id` (PK)
+- `region_id` (FK → Dim_Region) — *added: each surveyor is anchored to a single region, preventing units from a different region being assigned to them*
 - `anciennete_annees`
 - `niveau_experience`
 - `niveau_competence_it`
@@ -82,6 +83,7 @@ Star schema: `Dim_Unite_Enquetee` is the **central filter table**, surrounded by
 | Relationship | Cardinality | Constraint mechanism |
 |---|---|---|
 | Dim_Superviseur → Dim_Region | 1 — 1 | `UNIQUE(superviseur_id)` on `Dim_Region` |
+| Dim_Region → Dim_Enqueteur | 1 — * | Simple FK (each surveyor anchored to one region) |
 | Dim_Region → Dim_Unite_Enquetee | 1 — * | Simple FK |
 | Dim_Type_Unite → Dim_Unite_Enquetee | 1 — * | Simple FK |
 | Dim_Enqueteur → Dim_Unite_Enquetee | 1 — * | Simple FK |
@@ -97,9 +99,12 @@ Star schema: `Dim_Unite_Enquetee` is the **central filter table**, surrounded by
 |---|---|---|
 | Unit ↔ Field monitoring / Quality cardinality | 1:1, enforced via `UNIQUE(unite_id)` | A unit has one current monitoring state and one current quality indicator, not a history |
 | Supervisor ↔ Region cardinality | 1:1, enforced via `UNIQUE(superviseur_id)` | A supervisor covers exactly one region (confirmed) |
+| Surveyor ↔ region anchoring | `region_id` added to `Dim_Enqueteur` | Prevents a surveyor from being assigned units across multiple regions |
+| Real per-region headcounts | Actual figures (EIAP table): units, surveyors, vehicles, and tablets vary by region (e.g. Marrakech-Safi: 299 units / 7 surveyors; Eddakhla-Oued Eddahab: 24 units / 1 surveyor) | Replaces the initial uniform-distribution assumption |
+| Supervisors | 12 total (1 per region, strict 1:1) | Decision made despite the source table listing only 9 (3 regions with no real supervisor) |
 | Weighting | No sampling-weight column | Exhaustive census confirmed in Phase 1 |
 | Time link on fact tables | `date_id` added to `Fait_Suivi_Terrain` and `Fait_Qualite` | Required for REQ-06 (trends over time), missing from the initial schema |
 
 ## 2.7 End-of-phase deliverable
 
-Complete data schema (9 tables), with cardinalities specified, justified, and constrained (UNIQUE where 1:1 is required), ready for translation into SQL DDL.
+Complete data schema (9 tables), with cardinalities specified, justified, and constrained (UNIQUE where 1:1 is required; surveyor-region anchoring enforced via FK), ready for translation into SQL DDL — see the corrected star schema diagram above.
