@@ -19,13 +19,17 @@ Define the technical environment on which the Phase 2 schema will be implemented
 
 | Decision | Choice made | Rationale |
 |---|---|---|
-| Data generation order | Dimensions first (region → supervisor → unit type → field surveyor → surveyed unit → calendar), then facts | Required to satisfy FK constraints |
+| Data generation order | Dimensions first (supervisor → region → unit type → surveyor → surveyed unit → calendar), then facts | Required to satisfy FK constraints |
 | Enforcing 1:1 at generation time | Exactly one row per `unite_id` in `Fait_Suivi_Terrain` and `Fait_Qualite` | Consistent with the UNIQUE constraint set in Phase 2 |
+| Surveyor ↔ region anchoring at generation time | Each surveyor is attached to a single region at creation; units only draw their agent from surveyors of their own region | Prevents a surveyor from ending up with units across multiple regions |
+| Per-region headcount source | Real EIAP table (human and material resource needs), hardcoded in `REGIONS_DATA` | Replaces a uniform distribution with exact per-region figures (e.g. Marrakech-Safi: 299 units/7 surveyors/7 vehicles/8 tablets; Eddakhla-Oued Eddahab: 24 units/1 surveyor/1 vehicle/1 tablet) |
+| Number of supervisors | 12 total (1 per region, strict 1:1) | Decision made despite the source table listing only 9 (3 regions with no real supervisor) |
 | Simulated anomaly rate | **~10–15%** of units with an aberrant `ecart_gps_metres` or a high `nb_erreurs_capi` | Moderate: enough to demonstrate IQR/Z-score detection (REQ-04) without overly distorting overall KPIs |
 | Simulated non-response rate | **~10%** of units with `non_reponse` = Yes | Realistic for a mandatory administrative survey, without dominating the indicators |
+| Reproducibility | `random.seed(42)` fixed in the script | Ensures every run produces exactly the same data, for comparable analyses |
 | Database file location | `data/enquete_administrative.db` at the repo root | Consistent with the GitHub structure already in place |
 | Data-generation script location | `scripts/generate_data.py` | Clear separation between code and data |
 
 ## 3.4 End-of-phase deliverable
 
-Technical specification of the environment (SQLite + Python + Power BI), confirmed simulation parameters (10–15% anomalies, 10% non-response), and confirmed repo folder structure (`data/`, `scripts/`).
+Technical specification of the environment (SQLite + Python + Power BI), real per-region headcounts integrated (EIAP table), confirmed simulation parameters (10–15% anomalies, 10% non-response), confirmed repo folder structure (`data/`, `scripts/`), functional and validated `generate_data.py` script (0 surveyor/region inconsistencies).
