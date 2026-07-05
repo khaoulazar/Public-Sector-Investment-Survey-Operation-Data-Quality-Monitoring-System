@@ -31,8 +31,7 @@ et des tables du schéma en étoile, pour alimenter le tableau de bord Power BI.
 
 ### EX-23 — Indicateurs de gestion des ressources
 
-- **Ratio_Vehicules_Unites** : ratio véhicules disponibles par unité 
-  enquêtée, par région.
+- **Total_Vehicules_Disponible** : Total des véhicules disponibles par région.
 - **Cout_Carburant_Par_Unite** : coût moyen de carburant par unité enquêtée.
 
 ### EX-24 — Indicateurs temporels
