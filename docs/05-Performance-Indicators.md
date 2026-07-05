@@ -30,8 +30,7 @@ the star schema tables, feeding the Power BI dashboard.
 
 ### REQ-23 — Resource Management Indicators
 
-- **Ratio_Vehicules_Unites**: ratio of available vehicles per surveyed 
-  unit, by region.
+- **Total_Vehicules**: Total of vehicules available by region.
 - **Cout_Carburant_Par_Unite**: average fuel cost per surveyed unit.
 
 ### REQ-24 — Time-Based Indicators
