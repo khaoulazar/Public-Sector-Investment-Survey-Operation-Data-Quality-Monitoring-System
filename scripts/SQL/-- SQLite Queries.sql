@@ -195,11 +195,11 @@ SELECT anomalie FROM Vue_Coherence_Dates_Validee
 WHERE anomalie IS NOT NULL;
 
 --THIS PART IS VERY IMPORTANT FOR the LOAD STEP OF ETL WHICH IS PHASE 4 
---LOAD THE VIEWS IN TABLE_QUALITE_GLOBALE 
+--LOAD THE VIEWS IN VUE_QUALITE_GLOBALE 
 
 --Load: Table de synthèse qualité globale, une ligne par unité enquêtée
-DROP TABLE IF EXISTS Table_Qualite_Globale;
-CREATE TABLE Table_Qualite_Globale AS
+DROP VIEW IF EXISTS Vue_Qualite_Globale;
+CREATE VIEW Vue_Qualite_Globale AS
 SELECT
     ue.unite_id,
     ue.region_id,
@@ -214,14 +214,14 @@ SELECT
     vd.date_suivi_terrain,
     vd.date_qualite,
     CASE WHEN vc.unite_id IS NOT NULL THEN 'unité sans suivi terrain' ELSE NULL END AS anomalie_couverture,
-    CASE WHEN vp.anomalie = NULL THEN 'NNULL' ELSE vp.anomalie END AS anomalie_plages_valeurs,
-    CASE WHEN vd.anomalie = NULL THEN 'NNULL' ELSE vd.anomalie END AS anomalie_dates,
+    CASE WHEN vp.anomalie IS NULL OR vp.anomalie = '' THEN NULL ELSE vp.anomalie END AS anomalie_plages_valeurs,
+    CASE WHEN vd.anomalie IS NULL OR vd.anomalie = '' THEN NULL ELSE vd.anomalie END AS anomalie_dates,
     CASE WHEN vco.mode_collecte = 'non_renseigné' OR vco.etat_questionnaire = 'non_renseigné'
          THEN 'donnee(s) manquante(s) (mode_collecte/etat_questionnaire)' ELSE NULL END AS anomalie_completude,
     (
         (CASE WHEN vc.unite_id IS NOT NULL THEN 1 ELSE 0 END) +
-        (CASE WHEN vp.anomalie IS NOT NULL AND vp.anomalie != NULL THEN 1 ELSE 0 END) +
-        (CASE WHEN vd.anomalie IS NOT NULL AND vd.anomalie != NULL THEN 1 ELSE 0 END) +
+        (CASE WHEN vp.anomalie IS NOT NULL AND vp.anomalie != '' THEN 1 ELSE 0 END) +
+        (CASE WHEN vd.anomalie IS NOT NULL AND vd.anomalie != '' THEN 1 ELSE 0 END) +
         (CASE WHEN vco.mode_collecte = 'non_renseigné' OR vco.etat_questionnaire = 'non_renseigné' THEN 1 ELSE 0 END)
     ) AS score_qualite_global
 FROM Dim_Unite_Enquetee ue
@@ -231,11 +231,11 @@ LEFT JOIN Vue_Coherence_Dates_Validee vd ON ue.unite_id = vd.unite_id
 LEFT JOIN Vue_Completude_Validee vco ON ue.unite_id = vco.unite_id;
 
 --Vérifier le résultat
-SELECT * FROM Table_Qualite_Globale LIMIT 10;
+SELECT * FROM vue_Qualite_Globale LIMIT 10;
 
 --Vérifier la distribution du score
 SELECT score_qualite_global, COUNT(*) AS nb_unites
-FROM Table_Qualite_Globale
+FROM Vue_Qualite_Globale
 GROUP BY score_qualite_global;
 
 --apres avoir verifier la table qualite globale, date qualité doit etre grande que date suivi terrain
@@ -273,10 +273,90 @@ FROM Fait_Suivi_Terrain ft
 JOIN Fait_Qualite fq ON ft.unite_id = fq.unite_id
 WHERE fq.date_id <= ft.date_id;
 
+-- Changer la table qualite globale pour optimiser les prochaines operations, car une table est figée 
+DROP VIEW IF EXISTS Vue_Qualite_Globale;
+CREATE VIEW Vue_Qualite_Globale AS
+SELECT
+    ue.unite_id,
+    ue.region_id,
+    ue.type_unite_id,
+    ue.agent_id,
+    ue.secteur_activite,
+    ue.milieu,
+    vp.ecart_gps_metres,
+    vp.nb_tentatives,
+    vp.nb_corrections,
+    vp.nb_erreurs_capi,
+    vd.date_suivi_terrain,
+    vd.date_qualite,
+    CASE WHEN vc.unite_id IS NOT NULL THEN 'unité sans suivi terrain' ELSE NULL END AS anomalie_couverture,
+    CASE WHEN vp.anomalie = NULL THEN 'NNULL' ELSE vp.anomalie END AS anomalie_plages_valeurs,
+    CASE WHEN vd.anomalie = NULL THEN 'NNULL' ELSE vd.anomalie END AS anomalie_dates,
+    CASE WHEN vco.mode_collecte = 'non_renseigné' OR vco.etat_questionnaire = 'non_renseigné'
+         THEN 'donnee(s) manquante(s)' ELSE NULL END AS anomalie_completude,
+    (
+        (CASE WHEN vc.unite_id IS NOT NULL THEN 1 ELSE 0 END) +
+        (CASE WHEN vp.anomalie IS NOT NULL AND vp.anomalie != 'NNULL' THEN 1 ELSE 0 END) +
+        (CASE WHEN vd.anomalie IS NOT NULL AND vd.anomalie != 'NNULL' THEN 1 ELSE 0 END) +
+        (CASE WHEN vco.mode_collecte = 'non_renseigné' OR vco.etat_questionnaire = 'non_renseigné' THEN 1 ELSE 0 END)
+    ) AS score_qualite_global
+FROM Dim_Unite_Enquetee ue
+LEFT JOIN Vue_Couverture_Validee vc ON ue.unite_id = vc.unite_id
+LEFT JOIN Vue_Plages_Valeurs_Validee vp ON ue.unite_id = vp.unite_id
+LEFT JOIN Vue_Coherence_Dates_Validee vd ON ue.unite_id = vd.unite_id
+LEFT JOIN Vue_Completude_Validee vco ON ue.unite_id = vco.unite_id;
+-- AFFICHER LA VUE DE QUALITE GLOBALE
+SELECT * FROM Vue_Qualite_Globale LIMIT 10;
+
+-- NEXT STEP IS MOVING TO POWERBI FOR CREATING KPIs, DASHBOARDS AND VISUALIZATIONS BASED ON THE VUE_QUALITE_GLOBALE VIEW & THE OTHER VIEWS CREATED ABOVE.
 
 
+-- AVANT DE PASSER A POWERBI VERIFIER QUE TT Y EST ICI
+
+SELECT name, type FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY type, name;
 
 
+--REFERESH THE DATASET / ADD NEW ANOAMLIES
+--Recuperer 20 unites pour cibler les modif
+SELECT unite_id FROM Dim_Unite_Enquetee ORDER BY unite_id LIMIT 20;
 
+--Supprime les lignes de Fait_Suivi_Terrain pour 5 unités, pour simuler une absence de suivi
+DELETE FROM Fait_Suivi_Terrain WHERE unite_id IN (1, 2, 3, 4, 5);
+--ANOMALIES DE PLAGES DE VALEURS
+UPDATE Fait_Suivi_Terrain SET ecart_gps_metres = 850 WHERE unite_id = 6;
+UPDATE Fait_Suivi_Terrain SET ecart_gps_metres = -50 WHERE unite_id = 7;
+UPDATE Fait_Suivi_Terrain SET nb_tentatives = 15 WHERE unite_id = 8;
+UPDATE Fait_Qualite SET nb_corrections = 12 WHERE unite_id = 9;
+UPDATE Fait_Qualite SET nb_erreurs_capi = 14 WHERE unite_id = 10;
+-- ANOMALIES DE COMPLETUDE 
+UPDATE Fait_Suivi_Terrain SET mode_collecte = NULL WHERE unite_id = 16;
+UPDATE Fait_Suivi_Terrain SET mode_collecte = '' WHERE unite_id = 17;
+UPDATE Fait_Suivi_Terrain SET etat_questionnaire = NULL WHERE unite_id = 18;
+UPDATE Fait_Suivi_Terrain SET etat_questionnaire = '' WHERE unite_id = 19;
+UPDATE Fait_Suivi_Terrain SET mode_collecte = NULL, etat_questionnaire = NULL WHERE unite_id = 20;
+--VERIFIER QUE LES VUES DETECTENT BIEN LES ANOMALIES
+SELECT * FROM Vue_Qualite_Globale WHERE score_qualite_global > 0;
 
+--Correction : empiler plusieurs anomalies sur les mêmes unités/ score = 2
+-- Unité 1 : déjà sans suivi terrain (couverture) + on ajoute une anomalie de complétude sur Fait_Qualite
+UPDATE Fait_Qualite SET nb_corrections = 15 WHERE unite_id = 1;
 
+-- Unité 6 : déjà écart GPS hors plage + on ajoute une date hors période
+UPDATE Fait_Suivi_Terrain SET date_id = '2024-10-01' WHERE unite_id = 6;
+--Score = 3 (trois catégories cumulées) — unité 7
+-- Unité 7 : déjà écart GPS négatif (plages) + on ajoute date hors période + complétude manquante
+UPDATE Fait_Suivi_Terrain SET date_id = '2025-09-15', mode_collecte = NULL WHERE unite_id = 7;
+
+--Score = 4 (les quatre catégories) — unité 21 (nouvelle unité propre au départ)
+SELECT * FROM Vue_Qualite_Globale WHERE unite_id = 21;
+
+--correction du calcul de score globale ds le debut
+--TEST
+SELECT unite_id, score_qualite_global, anomalie_couverture, anomalie_plages_valeurs, anomalie_dates, anomalie_completude
+FROM Vue_Qualite_Globale
+WHERE unite_id IN (1, 6, 7)
+ORDER BY unite_id;
+
+-- jai ajouté la modalité "en cours" ds fait_suivi terrain ds etat questionnaire et lancé python 
+-- test
+SELECT DISTINCT etat_questionnaire FROM Fait_Suivi_Terrain;

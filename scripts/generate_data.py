@@ -277,8 +277,8 @@ def generate_suivi_terrain(conn, dates_disponibles):
     n_outliers_gps = round(len(unite_ids) * TAUX_ANOMALIE_GPS)
     outliers_gps = set(random.sample(unite_ids, n_outliers_gps))
     modes = ["CAPI tablette", "Papier"]
-    etats = ["Complet", "Incomplet", "Refusé", "Non localisé"]
-    distribution_tentatives = [1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5]
+    etats = ["Complet", "Incomplet", "Refusé", "Non localisé","En cours"]
+    distribution_tentatives = [1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5,6]
 
     rows = []
     for unite_id in unite_ids:
