@@ -2,7 +2,7 @@
 
 ---
 
-# Public Sector Investment Survey — Operation & Data Quality Monitoring System
+# Public Sector Investment Survey — Operation & Data collection Quality Monitoring 
 ## Tech Stack
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
